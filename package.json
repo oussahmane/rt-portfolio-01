@@ -1,9 +1,9 @@
 {
-  "name": "3d-portfolio",
+  "name": "rt-portfolio-01",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://0u554m4.github.io/td-portfolio-01",
+  "homepage": "https://oussahmane.github.io/rt-portfolio-01/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
