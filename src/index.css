@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+@import "tailwindcss";
+@theme {
+  --color-primary: #050816;
+  --color-secondary: #aaa6c3;
+  --color-tertiary: #151030;
+  
+  --color-black-100: #100d25;
+  --color-black-200: #090325;
+  --color-white-100: #f3f3f3;
+
+  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui;
+
+  --shadow-card: 0px 35px 120px -15px #211e35;
+  --shadow-premium: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+  --background-image-hero-pattern: url('/src/assets/herobg.png');
+}
+
+@layer base {
+  :root {
+    --primary: #050816;
+    --accent: #915eff;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    background-color: var(--primary);
+    color: white;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* NUCLEAR Overrides for Permanent Transparency */
+  section,
+  .vertical-timeline,
+  .vertical-timeline *,
+  .vertical-timeline-element-content,
+  .vertical-timeline-element-content-arrow,
+  [class*="vertical-timeline-element-content"],
+  [class*="vertical-timeline-element--"] {
+    background-color: transparent !important;
+  }
+
+  /* Core Glassmorphism Utility */
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.03) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 24px !important;
+  }
+
+  @media (min-width: 640px) {
+    .glassmorphism {
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-radius: 32px !important;
+    }
+  }
+
+  /* Specific Arrow and Line Styling */
+  .vertical-timeline-element-content-arrow {
+    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .vertical-timeline::before {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Force ALL parent sections to be transparent */
+  section,
+  section > div,
+  .hash-span {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  .vertical-timeline-element--left .vertical-timeline-element-content-arrow {
+    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: none !important;
+  }
+  .vertical-timeline-element--right .vertical-timeline-element-content-arrow {
+    border-left: 7px solid rgba(255, 255, 255, 0.1) !important;
+    border-right: none !important;
+  }
+
+  html[dir="rtl"] .vertical-timeline-element--left .vertical-timeline-element-content-arrow {
+    border-left: 7px solid rgba(255, 255, 255, 0.1) !important;
+    border-right: none !important;
+  }
+  html[dir="rtl"] .vertical-timeline-element--right .vertical-timeline-element-content-arrow {
+    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: none !important;
+  }
+
+  html[dir="rtl"] body {
+    font-family: "Cairo", sans-serif;
+  }
+
+  html[dir="rtl"] .vertical-timeline-element-content {
+    text-align: right;
+  }
+
+  /* Global RTL Fixes for Vertical Timeline Component */
+  @media only screen and (max-width: 1169px) {
+    html[dir="rtl"] .vertical-timeline::before {
+      left: auto !important;
+      right: 18px !important;
+    }
+    html[dir="rtl"] .vertical-timeline-element-icon {
+      left: auto !important;
+      right: 0 !important;
+      margin-right: 0 !important;
+    }
+    html[dir="rtl"] .vertical-timeline-element-content {
+      margin-left: 0 !important;
+      margin-right: 60px !important;
+    }
+    html[dir="rtl"] .vertical-timeline-element-content-arrow {
+      left: auto !important;
+      right: 100% !important;
+      border-right-width: 0 !important;
+      border-left-width: 7px !important;
+      border-left-color: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+
+  /* Aggressive Mobile Overflow Fix */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    position: relative;
+  }
+
+  /* Force Vertical Timeline to respect viewport */
+  .vertical-timeline {
+    width: 95% !important;
+    max-width: 1170px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+  }
+
+  @media only screen and (max-width: 1169px) {
+    .vertical-timeline-element-content {
+      width: auto !important;
+      margin-left: 60px !important;
+    }
+    
+    html[dir="rtl"] .vertical-timeline-element-content {
+      margin-left: 0 !important;
+      margin-right: 60px !important;
+      text-align: right !important;
+    }
+
+    html[dir="rtl"] .vertical-timeline-element-icon {
+      left: auto !important;
+      right: 0 !important;
+    }
+
+    html[dir="rtl"] .vertical-timeline::before {
+      left: auto !important;
+      right: 18px !important;
+    }
+  }
+
+  @media only screen and (max-width: 640px) {
+    .vertical-timeline-element-content {
+      margin-left: 40px !important;
+      padding: 1rem !important;
+    }
+    html[dir="rtl"] .vertical-timeline-element-content {
+      margin-left: 0 !important;
+      margin-right: 40px !important;
+    }
+    .vertical-timeline::before {
+      left: 16px !important;
+    }
+    html[dir="rtl"] .vertical-timeline::before {
+      left: auto !important;
+      right: 16px !important;
+    }
+    .vertical-timeline-element-icon {
+      width: 32px !important;
+      height: 32px !important;
+    }
+  }
+
+  /* Section Wrapper Strict Mode */
+  section {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+
+  .vertical-timeline-element-content-arrow {
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
+  .glassmorphism-navbar {
+    background: rgba(5, 8, 22, 0.4) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .premium-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-shine::after {
+    content: "";
+    position: absolute;
+    top: -110%;
+    left: -210%;
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.13)
+    );
+    transform: rotate(30deg);
+  }
+
+  .premium-shine:hover::after {
+    left: 100%;
+    top: 100%;
+    opacity: 1;
+  }
+
+  .hash-span {
+    margin-top: -100px;
+    padding-bottom: 100px;
+    display: block;
+  }
+
+  .black-gradient {
+    background: #000000;
+    background: linear-gradient(to right, #434343, #000000);
+  }
+
+  .violet-gradient {
+    background: #804dee;
+    background: linear-gradient(-90deg, #804dee 0%, rgba(60, 51, 80, 0) 100%);
+  }
+
+  .green-pink-gradient {
+    background: #00cea8;
+    background: linear-gradient(90.13deg, #00cea8 1.9%, #bf61ff 97.5%);
+  }
+
+  .blue-text-gradient {
+    background: #56ccf2;
+    background: linear-gradient(to right, #2f80ed, #56ccf2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .green-text-gradient {
+    background: #11998e;
+    background: linear-gradient(to right, #38ef7d, #11998e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .pink-text-gradient {
+    background: #ec008c;
+    background: linear-gradient(to right, #fc6767, #ec008c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050816;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #915eff;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #804dee;
+}

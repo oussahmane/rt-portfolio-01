@@ -1,0 +1,19 @@
+# Admin Access Information
+
+## 🌐 Admin Dashboard URL
+You can access your admin portal at:
+https://0u554m4.github.io/td-portfolio-01/#/admin/login
+
+## 🔑 Admin Credentials
+Firebase authentication is used for the admin portal. Credentials are managed directly in your Firebase Console.
+
+If you haven't created an admin account yet:
+1. Go to the [Firebase Console](https://console.firebase.google.com/).
+2. Select your project: **td-portfolio-01**.
+3. Navigate to **"Authentication"** > **"Users"**.
+4. Click **"Add user"**.
+5. Provide your preferred **Admin Email** and **Password**.
+6. Use these credentials to log in at the URL above.
+
+> [!NOTE]
+> These credentials are not stored in the repository for security reasons. Your Firestore rules currently restrict database access to authenticated users only.

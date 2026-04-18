@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /messages/{messageId} {
+      // Anyone can send a message
+      allow create: if true;
+      
+      // Only authenticated admins can read messages
+      allow read: if request.auth != null;
+      
+      // Typically admins don't update/delete from the dashboard unless implemented
+      allow update, delete: if request.auth != null;
+    }
+  }
+}
