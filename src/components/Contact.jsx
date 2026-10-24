@@ -1,169 +1,195 @@
-import React, { useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, Twitter, Instagram, Facebook, MessageCircle, Send } from "lucide-react";
-import { FaTiktok } from "react-icons/fa6";
-import { db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useState } from "react";
+import { Facebook, Github, Instagram, Linkedin, Mail } from "lucide-react";
+import { FaTiktok, FaXTwitter } from "react-icons/fa6";
 
+import { profiles } from "../constants";
 import SectionWrapper from "../hoc/SectionWrapper";
-import { slideIn } from "../utils/motion";
 import { useLanguage } from "../utils/i18n";
+import SectionHeading from "./SectionHeading";
 
-const Contact = () => {
-  const formRef = useRef();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+const socialLinks = [
+  { name: "GitHub", href: profiles.github, icon: Github },
+  { name: "LinkedIn", href: profiles.linkedin, icon: Linkedin },
+  { name: "X", href: profiles.twitter, icon: FaXTwitter },
+  { name: "Instagram", href: profiles.instagram, icon: Instagram },
+  { name: "Facebook", href: profiles.facebook, icon: Facebook },
+  { name: "TikTok", href: profiles.tiktok, icon: FaTiktok },
+];
 
-  const [loading, setLoading] = useState(false);
+const Contact = ({ headingId }) => {
   const { t } = useLanguage();
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
 
-  const handleChange = (e) => {
-    const { target } = e;
-    const { name, value } = target;
-
-    setForm({
-      ...form,
-      [name]: value,
-    });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+    setErrors((current) => ({ ...current, [name]: "" }));
+    setStatus("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const validate = () => {
+    const nextErrors = {};
+    if (!form.name.trim()) nextErrors.name = t("contact.nameRequired");
+    if (!form.email.trim()) nextErrors.email = t("contact.emailRequired");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      nextErrors.email = t("contact.emailInvalid");
+    }
+    if (!form.message.trim()) nextErrors.message = t("contact.messageRequired");
+    return nextErrors;
+  };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const nextErrors = validate();
+    setErrors(nextErrors);
+    setStatus("");
+    if (Object.keys(nextErrors).length) return;
+
+    setLoading(true);
     try {
+      const { db } = await import("../firebase");
+      const { addDoc, collection, serverTimestamp } = await import("firebase/firestore");
       await addDoc(collection(db, "messages"), {
-        name: form.name,
-        email: form.email,
-        message: form.message,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        message: form.message.trim(),
         createdAt: serverTimestamp(),
         status: "unread",
         processingStatus: "pending",
       });
-
-      setLoading(false);
-      alert(t('contact.success'));
-
-      setForm({
-        name: "",
-        email: "",
-        message: "",
-      });
+      setStatus("success");
+      setForm({ name: "", email: "", message: "" });
     } catch (error) {
-      setLoading(false);
       console.error(error);
-      alert(t('contact.error'));
+      setStatus("error");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const socialLinks = [
-    { name: 'linkedin', icon: <Linkedin size={28} />, url: 'https://www.linkedin.com/in/oussahmane/' },
-    { name: 'github', icon: <Github size={28} />, url: 'https://github.com/oussahmane' },
-    { name: 'twitter', icon: <Twitter size={28} />, url: 'https://x.com/oussahmane' },
-    { name: 'instagram', icon: <Instagram size={28} />, url: 'https://www.instagram.com/oussahmane/' },
-    { name: 'facebook', icon: <Facebook size={28} />, url: 'https://www.facebook.com/oussahmane' },
-    { name: 'whatsapp', icon: <MessageCircle size={28} />, url: 'https://whatsapp.com' },
-    { name: 'telegram', icon: <Send size={28} />, url: 'https://telegram.com' },
-    { name: 'gmail', icon: <Mail size={28} />, url: 'mailto:oussahmane@gmail.com' },
-    { name: 'tiktok', icon: <FaTiktok size={28} />, url: 'https://www.tiktok.com/@oussahmane' },
-  ];
-
   return (
-    <div className='xl:mt-12 flex flex-col gap-10 overflow-hidden'>
-      <div className='flex xl:flex-row flex-col-reverse gap-10'>
-        <motion.div
-          variants={slideIn("left", "tween", 0.2, 1)}
-          className='flex-[0.75] glassmorphism p-5 sm:p-8 rounded-2xl border border-white/10 shadow-2xl relative overflow-hidden group'
-        >
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#915eff]/50 to-transparent" />
-        
-          <p className='sm:text-[18px] text-[14px] text-secondary uppercase tracking-widest'>{t('contact.subtitle')}</p>
-          <h3 className='text-white font-black md:text-[60px] sm:text-[50px] xs:text-[40px] text-[30px]'>{t('contact.title')}</h3>
-
-          <form
-            ref={formRef}
-            onSubmit={handleSubmit}
-            className='mt-8 sm:mt-12 flex flex-col gap-6 sm:gap-8'
+    <>
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+        <div>
+          <SectionHeading
+            id={headingId}
+            eyebrow={t("contact.eyebrow")}
+            title={t("contact.title")}
+            description={t("contact.description")}
+          />
+          <a
+            href={`mailto:${profiles.email}`}
+            className="mt-6 inline-flex min-h-11 items-center gap-2 text-base font-medium text-white underline-offset-4 hover:underline"
           >
-            <label className='flex flex-col'>
-              <span className='text-white font-medium mb-3 sm:mb-4'>{t('contact.nameLabel')}</span>
+            <Mail aria-hidden="true" size={18} />
+            {profiles.email}
+          </a>
+
+          <h3 className="mt-10 text-sm font-medium text-[#d5e2f4]">{t("contact.profiles")}</h3>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {socialLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label={link.name}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 text-[#dbe6f5] hover:border-white/30 hover:text-white"
+                  >
+                    <Icon aria-hidden="true" size={18} />
+                    <span className="sr-only">{t("nav.newTab")}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <form className="surface no-print p-6 sm:p-8" onSubmit={handleSubmit} noValidate>
+          <div className="flex flex-col gap-5">
+            <label className="flex flex-col gap-2" htmlFor="contact-name">
+              <span className="text-sm font-medium text-white">{t("contact.nameLabel")}</span>
               <input
-                type='text'
-                name='name'
+                id="contact-name"
+                className="field"
+                type="text"
+                name="name"
+                autoComplete="name"
                 value={form.name}
                 onChange={handleChange}
-                placeholder={t('contact.namePlaceholder')}
-                className='bg-white/5 py-3 sm:py-4 px-5 sm:px-6 placeholder:text-secondary text-white rounded-xl outline-none border border-white/10 font-medium focus:border-[#915eff] transition-colors'
-                required
+                placeholder={t("contact.namePlaceholder")}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? "contact-name-error" : undefined}
               />
+              {errors.name ? (
+                <span id="contact-name-error" className="text-sm text-[#f0c9c9]">
+                  {errors.name}
+                </span>
+              ) : null}
             </label>
-            <label className='flex flex-col'>
-              <span className='text-white font-medium mb-3 sm:mb-4'>{t('contact.emailLabel')}</span>
+
+            <label className="flex flex-col gap-2" htmlFor="contact-email">
+              <span className="text-sm font-medium text-white">{t("contact.emailLabel")}</span>
               <input
-                type='email'
-                name='email'
+                id="contact-email"
+                className="field"
+                type="email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder={t('contact.emailPlaceholder')}
-                className='bg-white/5 py-3 sm:py-4 px-5 sm:px-6 placeholder:text-secondary text-white rounded-xl outline-none border border-white/10 font-medium focus:border-[#915eff] transition-colors'
-                required
+                placeholder={t("contact.emailPlaceholder")}
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "contact-email-error" : undefined}
               />
+              {errors.email ? (
+                <span id="contact-email-error" className="text-sm text-[#f0c9c9]">
+                  {errors.email}
+                </span>
+              ) : null}
             </label>
-            <label className='flex flex-col'>
-              <span className='text-white font-medium mb-3 sm:mb-4'>{t('contact.messageLabel')}</span>
+
+            <label className="flex flex-col gap-2" htmlFor="contact-message">
+              <span className="text-sm font-medium text-white">{t("contact.messageLabel")}</span>
               <textarea
-                rows={5}
-                name='message'
+                id="contact-message"
+                className="field min-h-36 resize-y"
+                name="message"
                 value={form.message}
                 onChange={handleChange}
-                placeholder={t('contact.messagePlaceholder')}
-                className='bg-white/5 py-3 sm:py-4 px-5 sm:px-6 placeholder:text-secondary text-white rounded-xl outline-none border border-white/10 font-medium focus:border-[#915eff] transition-colors resize-none'
-                required
+                placeholder={t("contact.messagePlaceholder")}
+                aria-invalid={Boolean(errors.message)}
+                aria-describedby={errors.message ? "contact-message-error" : undefined}
               />
+              {errors.message ? (
+                <span id="contact-message-error" className="text-sm text-[#f0c9c9]">
+                  {errors.message}
+                </span>
+              ) : null}
             </label>
 
-            <button
-              type='submit'
-              className='bg-[#915eff] py-3 sm:py-4 px-8 sm:px-10 rounded-xl outline-none w-full sm:w-fit text-white font-bold shadow-md shadow-primary hover:bg-[#804dee] transition-all transform hover:scale-105 active:scale-95'
-            >
-              {loading ? t('contact.sending') : t('contact.send')}
+            <button type="submit" className="btn btn-primary w-full sm:w-fit" disabled={loading}>
+              {loading ? t("contact.sending") : t("contact.send")}
             </button>
-          </form>
 
-          {/* Social Icons Section */}
-          <div className="mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-white/5">
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
-              {socialLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-secondary hover:text-white transition-all duration-300 transform hover:scale-125 hover:rotate-6 active:scale-95"
-                  aria-label={link.name}
-                >
-                  {React.cloneElement(link.icon, { 
-                    className: "w-8 h-8 sm:w-9 sm:h-9" 
-                  })}
-                </a>
-              ))}
-            </div>
-            
-            <div className="mt-10 sm:mt-12 text-center">
-              <p className="text-secondary text-[12px] sm:text-[14px] font-medium tracking-wide">
-                © {new Date().getFullYear()} Oussama. All rights reserved.
-              </p>
-            </div>
+            <p role="status" aria-live="polite" className="min-h-6 text-sm text-secondary">
+              {status === "success" ? t("contact.success") : null}
+              {status === "error" ? t("contact.error") : null}
+            </p>
           </div>
-        </motion.div>
+        </form>
       </div>
 
-      {/* Social Footer Section */}
-      {/* The original social footer section was replaced by the new social icons section within the motion.div */}
-    </div>
+      <p className="mt-14 text-sm text-secondary">
+        © {new Date().getFullYear()} {t("hero.name")}. {t("contact.rights")}
+      </p>
+    </>
   );
 };
 

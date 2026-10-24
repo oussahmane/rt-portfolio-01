@@ -1,328 +1,241 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
 @theme {
-  --color-primary: #050816;
-  --color-secondary: #aaa6c3;
-  --color-tertiary: #151030;
-  
-  --color-black-100: #100d25;
-  --color-black-200: #090325;
-  --color-white-100: #f3f3f3;
-
-  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui;
-
-  --shadow-card: 0px 35px 120px -15px #211e35;
-  --shadow-premium: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-
-  --background-image-hero-pattern: url('/src/assets/herobg.png');
+  --color-primary: #070b14;
+  --color-secondary: #b7c0d1;
+  --color-tertiary: #121826;
+  --color-black-100: #101624;
+  --color-black-200: #090d16;
+  --color-white-100: #e7eef8;
+  --font-sans: "Outfit", "Segoe UI", sans-serif;
 }
 
 @layer base {
   :root {
-    --primary: #050816;
-    --accent: #915eff;
+    color-scheme: dark;
   }
 
   * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
-    scroll-behavior: smooth;
-    color-scheme: dark;
-    -webkit-tap-highlight-color: transparent;
   }
 
-  html, body {
-    background-color: var(--primary);
-    color: white;
+  html {
+    scroll-behavior: smooth;
+    background-color: #070b14;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background-color: #070b14;
+    color: #e7eef8;
     font-family: var(--font-sans);
-    overflow-x: hidden;
-    width: 100%;
-    position: relative;
+    text-rendering: optimizeLegibility;
   }
 
   #root {
-    width: 100%;
-    overflow-x: hidden;
+    min-height: 100svh;
+  }
+
+  html[dir="rtl"] body {
+    font-family: "Cairo", "Outfit", "Noto Naskh Arabic", sans-serif;
+  }
+
+  :focus-visible {
+    outline: 2px solid #d5e4f7;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: #d5e4f7;
+    color: #101624;
   }
 }
 
 @layer components {
-  /* NUCLEAR Overrides for Permanent Transparency */
-  section,
-  .vertical-timeline,
-  .vertical-timeline *,
-  .vertical-timeline-element-content,
-  .vertical-timeline-element-content-arrow,
-  [class*="vertical-timeline-element-content"],
-  [class*="vertical-timeline-element--"] {
-    background-color: transparent !important;
+  .font-tech {
+    font-family: "Outfit", "Segoe UI", sans-serif;
   }
 
-  /* Core Glassmorphism Utility */
-  .glassmorphism {
-    background: rgba(255, 255, 255, 0.03) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
-    border-radius: 24px !important;
+  .surface {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
   }
 
-  @media (min-width: 640px) {
-    .glassmorphism {
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      border-radius: 32px !important;
-    }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   }
 
-  /* Specific Arrow and Line Styling */
-  .vertical-timeline-element-content-arrow {
-    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
+  .btn-primary {
+    background: #e4eef8;
+    color: #101624;
   }
 
-  .vertical-timeline::before {
-    background: rgba(255, 255, 255, 0.1) !important;
+  .btn-primary:hover {
+    background: #f4f8fc;
   }
 
-  /* Force ALL parent sections to be transparent */
-  section,
-  section > div,
-  .hash-span {
-    background: transparent !important;
-    background-color: transparent !important;
+  .btn-secondary {
+    background: transparent;
+    color: #e7eef8;
+    border-color: rgba(228, 238, 248, 0.35);
   }
 
-  .vertical-timeline-element--left .vertical-timeline-element-content-arrow {
-    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
-    border-left: none !important;
-  }
-  .vertical-timeline-element--right .vertical-timeline-element-content-arrow {
-    border-left: 7px solid rgba(255, 255, 255, 0.1) !important;
-    border-right: none !important;
+  .btn-secondary:hover {
+    border-color: rgba(228, 238, 248, 0.75);
   }
 
-  html[dir="rtl"] .vertical-timeline-element--left .vertical-timeline-element-content-arrow {
-    border-left: 7px solid rgba(255, 255, 255, 0.1) !important;
-    border-right: none !important;
-  }
-  html[dir="rtl"] .vertical-timeline-element--right .vertical-timeline-element-content-arrow {
-    border-right: 7px solid rgba(255, 255, 255, 0.1) !important;
-    border-left: none !important;
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 
-  html[dir="rtl"] body {
-    font-family: "Cairo", sans-serif;
+  .field {
+    width: 100%;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(7, 11, 20, 0.45);
+    color: #e7eef8;
+    padding: 0.85rem 1rem;
+    font: inherit;
   }
 
-  html[dir="rtl"] .vertical-timeline-element-content {
-    text-align: right;
+  .field::placeholder {
+    color: #8e98ab;
   }
 
-  /* Global RTL Fixes for Vertical Timeline Component */
-  @media only screen and (max-width: 1169px) {
-    html[dir="rtl"] .vertical-timeline::before {
-      left: auto !important;
-      right: 18px !important;
-    }
-    html[dir="rtl"] .vertical-timeline-element-icon {
-      left: auto !important;
-      right: 0 !important;
-      margin-right: 0 !important;
-    }
-    html[dir="rtl"] .vertical-timeline-element-content {
-      margin-left: 0 !important;
-      margin-right: 60px !important;
-    }
-    html[dir="rtl"] .vertical-timeline-element-content-arrow {
-      left: auto !important;
-      right: 100% !important;
-      border-right-width: 0 !important;
-      border-left-width: 7px !important;
-      border-left-color: rgba(255, 255, 255, 0.1) !important;
-    }
+  .field[aria-invalid="true"] {
+    border-color: #e7b7b7;
   }
 
-  /* Aggressive Mobile Overflow Fix */
-  html, body {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  #root {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    position: relative;
-  }
-
-  /* Force Vertical Timeline to respect viewport */
-  .vertical-timeline {
-    width: 95% !important;
-    max-width: 1170px !important;
-    margin: 0 auto !important;
-    overflow: hidden !important;
-  }
-
-  @media only screen and (max-width: 1169px) {
-    .vertical-timeline-element-content {
-      width: auto !important;
-      margin-left: 60px !important;
-    }
-    
-    html[dir="rtl"] .vertical-timeline-element-content {
-      margin-left: 0 !important;
-      margin-right: 60px !important;
-      text-align: right !important;
-    }
-
-    html[dir="rtl"] .vertical-timeline-element-icon {
-      left: auto !important;
-      right: 0 !important;
-    }
-
-    html[dir="rtl"] .vertical-timeline::before {
-      left: auto !important;
-      right: 18px !important;
-    }
-  }
-
-  @media only screen and (max-width: 640px) {
-    .vertical-timeline-element-content {
-      margin-left: 40px !important;
-      padding: 1rem !important;
-    }
-    html[dir="rtl"] .vertical-timeline-element-content {
-      margin-left: 0 !important;
-      margin-right: 40px !important;
-    }
-    .vertical-timeline::before {
-      left: 16px !important;
-    }
-    html[dir="rtl"] .vertical-timeline::before {
-      left: auto !important;
-      right: 16px !important;
-    }
-    .vertical-timeline-element-icon {
-      width: 32px !important;
-      height: 32px !important;
-    }
-  }
-
-  /* Section Wrapper Strict Mode */
-  section {
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-
-  .vertical-timeline-element-content-arrow {
-    background: transparent !important;
-    backdrop-filter: none !important;
-  }
-
-  .glassmorphism-navbar {
-    background: rgba(5, 8, 22, 0.4) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-  }
-
-  .premium-shine {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .premium-shine::after {
-    content: "";
+  .skip-link {
     position: absolute;
-    top: -110%;
-    left: -210%;
-    width: 200%;
-    height: 200%;
-    opacity: 0;
-    transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-    background: linear-gradient(
-      120deg,
-      rgba(255, 255, 255, 0.13),
-      rgba(255, 255, 255, 0.05),
-      rgba(255, 255, 255, 0.13)
-    );
-    transform: rotate(30deg);
+    top: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 80;
+    transform: translateY(-150%);
+    background: #e4eef8;
+    color: #101624;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
   }
 
-  .premium-shine:hover::after {
-    left: 100%;
-    top: 100%;
-    opacity: 1;
+  .skip-link:focus {
+    transform: translateY(0);
   }
 
-  .hash-span {
-    margin-top: -100px;
-    padding-bottom: 100px;
-    display: block;
+  .hero-scrim {
+    background: linear-gradient(90deg, rgba(7, 11, 20, 0.88) 0%, rgba(7, 11, 20, 0.62) 34%, rgba(7, 11, 20, 0.08) 62%, rgba(7, 11, 20, 0) 78%);
   }
 
-  .black-gradient {
-    background: #000000;
-    background: linear-gradient(to right, #434343, #000000);
+  html[dir="rtl"] .hero-scrim {
+    background: linear-gradient(270deg, rgba(7, 11, 20, 0.88) 0%, rgba(7, 11, 20, 0.62) 34%, rgba(7, 11, 20, 0.08) 62%, rgba(7, 11, 20, 0) 78%);
   }
 
-  .violet-gradient {
-    background: #804dee;
-    background: linear-gradient(-90deg, #804dee 0%, rgba(60, 51, 80, 0) 100%);
+  .galaxy-fallback {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 75% 18%, rgba(120, 146, 196, 0.16), transparent 42%),
+      radial-gradient(ellipse at 18% 78%, rgba(90, 140, 170, 0.12), transparent 40%),
+      #070b14;
   }
 
-  .green-pink-gradient {
-    background: #00cea8;
-    background: linear-gradient(90.13deg, #00cea8 1.9%, #bf61ff 97.5%);
-  }
-
-  .blue-text-gradient {
-    background: #56ccf2;
-    background: linear-gradient(to right, #2f80ed, #56ccf2);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .green-text-gradient {
-    background: #11998e;
-    background: linear-gradient(to right, #38ef7d, #11998e);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .pink-text-gradient {
-    background: #ec008c;
-    background: linear-gradient(to right, #fc6767, #ec008c);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #050816;
+  background: #070b14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #915eff;
-  border-radius: 10px;
+  background: #2a3548;
+  border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #804dee;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  nav,
+  .no-print,
+  .galaxy-fallback,
+  .hero-scrim {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #root {
+    background: #fff !important;
+    color: #161616 !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  li,
+  a,
+  span,
+  label {
+    color: #161616 !important;
+  }
+
+  .surface {
+    background: #fff !important;
+    border-color: #ccc !important;
+    break-inside: avoid;
+  }
+
+  a[href^="http"]::after,
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+  }
 }

@@ -1,65 +1,70 @@
-import { motion } from "framer-motion";
-import { textVariant } from "../utils/motion";
+import { Github, Linkedin, Mail } from "lucide-react";
+import { profiles } from "../constants";
 import { useLanguage } from "../utils/i18n";
+import { scrollToSection } from "../utils/scroll";
 
 const Hero = () => {
-  const { t } = useLanguage();
+  const { t, isRtl } = useLanguage();
+
+  const profileLinks = [
+    { id: "github", href: profiles.github, icon: Github, external: true },
+    { id: "linkedin", href: profiles.linkedin, icon: Linkedin, external: true },
+    { id: "email", href: `mailto:${profiles.email}`, icon: Mail, external: false },
+  ];
 
   return (
-    <section className={`relative w-full h-screen mx-auto overflow-hidden`}>
-      <div
-        className={`absolute inset-0 top-[120px] max-w-7xl mx-auto sm:px-16 px-6 flex flex-col md:flex-row items-start gap-5 z-10`}
-      >
+    <section className="relative flex min-h-[100svh] items-center" aria-labelledby="hero-heading">
+      <div className="hero-scrim pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 lg:px-10">
+        <p
+          className={`text-[0.82rem] font-medium text-[#d5e2f4] ${
+            isRtl ? "tracking-normal" : "uppercase tracking-[0.16em]"
+          }`}
+        >
+          {t("hero.eyebrow")}
+        </p>
+        <h1
+          id="hero-heading"
+          className="mt-4 text-[clamp(3rem,8vw,5.4rem)] font-semibold leading-none tracking-tight text-white"
+        >
+          {t("hero.name")}
+        </h1>
+        <p className="mt-5 max-w-2xl text-[clamp(1.35rem,2.4vw,1.9rem)] font-medium leading-snug text-[#e7eef8]">
+          {t("hero.headline")}
+        </p>
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-secondary">
+          {t("hero.description")}
+        </p>
 
-        <div className="w-full">
-          <motion.h1 
-            variants={textVariant(0.1)}
-            className={`font-black text-white lg:text-[80px] sm:text-[60px] xs:text-[40px] text-[32px] lg:leading-[98px] mt-2 ${useLanguage().isRtl ? 'text-right' : 'text-left'}`}
-          >
-            {t('hero.greeting')} <span className='text-[#915eff] drop-shadow-[0_0_15px_rgba(145,94,255,0.5)]'>{t('hero.name')}</span>
-          </motion.h1>
-          <motion.p 
-            variants={textVariant(0.2)}
-            className={`text-[#dfd9ff] font-medium lg:text-[30px] sm:text-[26px] xs:text-[20px] text-[16px] lg:leading-[40px] mt-2 ${useLanguage().isRtl ? 'text-right' : 'text-left'}`}
-          >
-            {t('hero.subtitle')} <br className='sm:block hidden' />
-            {t('hero.subtitleBr')}
-          </motion.p>
-          
-          <motion.div 
-            variants={textVariant(0.3)}
-            className={`mt-10 flex flex-col sm:flex-row gap-5 ${useLanguage().isRtl ? 'sm:flex-row-reverse' : ''}`}
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className='bg-[#915eff] py-3 px-8 rounded-xl outline-none w-full sm:w-fit text-white font-bold shadow-md shadow-primary transition-all duration-300'
-              onClick={() => {
-                const element = document.getElementById("projects");
-                if (element) {
-                   const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
-                   window.scrollTo({top: y, behavior: 'smooth'});
-                }
-              }}
-            >
-              {t('hero.viewProjects')}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className='border border-[#915eff] py-3 px-8 rounded-xl outline-none w-full sm:w-fit text-white font-bold transition-all duration-300'
-              onClick={() => {
-                const element = document.getElementById("contact");
-                if (element) {
-                   const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
-                   window.scrollTo({top: y, behavior: 'smooth'});
-                }
-              }}
-            >
-              {t('hero.contactMe')}
-            </motion.button>
-          </motion.div>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => scrollToSection("projects")}>
+            {t("hero.viewProjects")}
+          </button>
+          <button type="button" className="btn btn-secondary w-full sm:w-auto" onClick={() => scrollToSection("contact")}>
+            {t("hero.contactMe")}
+          </button>
         </div>
+
+        <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
+          {profileLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <li key={link.id}>
+                <a
+                  href={link.href}
+                  className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[#dbe6f5] underline-offset-4 hover:underline"
+                  {...(link.external
+                    ? { target: "_blank", rel: "noreferrer noopener" }
+                    : {})}
+                >
+                  <Icon aria-hidden="true" size={16} />
+                  {t(`hero.${link.id}`)}
+                  {link.external ? <span className="sr-only">{t("nav.newTab")}</span> : null}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

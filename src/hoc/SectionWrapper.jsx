@@ -5,17 +5,15 @@ const SectionWrapper = (Component, idName) =>
   function HOC() {
     return (
       <motion.section
+        id={idName}
+        aria-labelledby={`${idName}-heading`}
         variants={staggerContainer()}
-        initial='hidden'
-        whileInView='show'
-        viewport={{ once: true, amount: 0.01 }}
-        className={`sm:px-16 px-4 sm:py-16 py-10 max-w-7xl mx-auto relative z-0`}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: "some", margin: "0px 0px -10% 0px" }}
+        className="relative z-0 mx-auto max-w-6xl scroll-mt-24 px-5 py-16 sm:px-8 sm:py-24 lg:px-10"
       >
-        <span className='hash-span' id={idName}>
-          &nbsp;
-        </span>
-
-        <Component />
+        <Component headingId={`${idName}-heading`} />
       </motion.section>
     );
   };
