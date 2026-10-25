@@ -15,7 +15,7 @@ class CanvasBoundary extends Component {
   }
 
   render() {
-    if (this.state.failed) return <div className="galaxy-fallback" aria-hidden="true" />;
+    if (this.state.failed) return null;
     return this.props.children;
   }
 }
@@ -23,19 +23,48 @@ class CanvasBoundary extends Component {
 const supportsWebGL = () => {
   try {
     const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl"));
+    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    return Boolean(gl);
   } catch {
     return false;
   }
 };
 
-const ShootingStar = () => {
+const streakMap = (() => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  const mid = 32;
+
+  for (let y = 0; y < 256; y += 1) {
+    const t = y / 255;
+    const fade = (1 - t) ** 1.55;
+    const half = (1 - t) * 14 + 0.6;
+    const shade = ctx.createLinearGradient(mid - half, y, mid + half, y);
+    shade.addColorStop(0, "rgba(214,228,246,0)");
+    shade.addColorStop(0.5, `rgba(255,255,255,${fade})`);
+    shade.addColorStop(1, "rgba(214,228,246,0)");
+    ctx.fillStyle = shade;
+    ctx.fillRect(mid - half, y, half * 2, 1);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+})();
+
+const SLOPE = 0.55;
+const STREAK_TILT = Math.atan2(1 / Math.hypot(1, SLOPE), -SLOPE / Math.hypot(1, SLOPE));
+
+const ShootingStar = ({ delay = 800 }) => {
   const ref = useRef();
-  const speed = useRef(2.2);
   const active = useRef(false);
-  const spawnTime = useRef(Date.now() + Math.random() * 12000);
-  const length = useMemo(() => Math.random() * 0.35 + 0.12, []);
-  const thickness = useMemo(() => Math.random() * 0.0015 + 0.0008, []);
+  const spawnTime = useRef(Date.now() + delay);
+  const speed = useRef(2.6);
+  const length = useMemo(() => 1.45 + Math.random() * 0.7, []);
 
   useFrame((_, delta) => {
     if (!ref.current) return;
@@ -46,252 +75,45 @@ const ShootingStar = () => {
         return;
       }
       active.current = true;
-      ref.current.position.set((Math.random() - 0.5) * 6, Math.random() * 4 + 2.5, (Math.random() - 0.5) * 2 - 1);
       ref.current.visible = true;
-      speed.current = Math.random() * 1.6 + 1.4;
+      ref.current.position.set(2.5 + Math.random() * 4.5, 0.6 + Math.random() * 2.6, -5.5);
+      speed.current = 2.2 + Math.random() * 1.1;
       return;
     }
 
     const move = speed.current * delta;
     ref.current.position.x -= move;
-    ref.current.position.y -= move * 0.85;
-    if (ref.current.position.y < -3) {
+    ref.current.position.y -= move * SLOPE;
+    if (ref.current.position.y < -4.4 || ref.current.position.x < -9) {
       active.current = false;
       ref.current.visible = false;
-      spawnTime.current = Date.now() + Math.random() * 9000 + 4000;
+      spawnTime.current = Date.now() + 2500 + Math.random() * 4500;
     }
   });
 
   return (
-    <mesh ref={ref} visible={false} rotation={[0, 0, Math.PI / 4]}>
-      <cylinderGeometry args={[0, thickness, length, 4]} />
-      <meshBasicMaterial color="#dbe7ff" transparent opacity={0.45} depthWrite={false} />
-    </mesh>
-  );
-};
-
-const Galaxy = ({ position, rotation, color, scale = 1, count = 1800 }) => {
-  const ref = useRef();
-  const positions = useMemo(() => {
-    const coords = new Float32Array(count * 3);
-    const arms = 3;
-    const radius = 2.4 * scale;
-    const spin = 3.2;
-
-    for (let i = 0; i < count; i += 1) {
-      const i3 = i * 3;
-      const distance = Math.pow(Math.random(), 1.5) * radius;
-      const armAngle = (i % arms) * ((Math.PI * 2) / arms);
-      const spinAngle = distance * spin;
-      const scatter = 0.18 * distance;
-      const random = () => (Math.random() < 0.5 ? -1 : 1) * Math.random() * scatter;
-
-      coords[i3] = Math.cos(armAngle + spinAngle) * distance + random();
-      coords[i3 + 1] = random() * 0.35;
-      coords[i3 + 2] = Math.sin(armAngle + spinAngle) * distance + random();
-    }
-
-    return coords;
-  }, [count, scale]);
-
-  useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta / 45;
-  });
-
-  return (
-    <group position={position} rotation={rotation}>
-      <Points ref={ref} positions={positions} stride={3} frustumCulled>
-        <PointMaterial
+    <group ref={ref} visible={false} rotation={[0, 0, STREAK_TILT]}>
+      <mesh position={[0, -length / 2, 0]} frustumCulled={false}>
+        <planeGeometry args={[0.16, length]} />
+        <meshBasicMaterial
+          map={streakMap}
           transparent
-          color={color}
-          size={0.0034 * scale}
-          sizeAttenuation
           depthWrite={false}
-          opacity={0.72}
+          toneMapped={false}
+          side={THREE.DoubleSide}
         />
-      </Points>
+      </mesh>
     </group>
   );
 };
 
-const constellationData = [
-  {
-    scale: 1.1,
-    center: [-6, 3, -4],
-    stars: [
-      [-1.5, 0.3, 0], [-0.8, 0, 0.1], [-0.2, -0.1, 0],
-      [0.2, -0.3, -0.1], [0.4, -0.8, 0], [1.2, -0.7, 0.2], [1, 0.2, -0.1],
-    ],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 3]],
-  },
-  {
-    scale: 1.3,
-    center: [5, 2, -6],
-    stars: [
-      [-0.5, 1, 0], [0.5, 0.8, 0.1], [-0.2, 0, 0],
-      [0, -0.1, -0.1], [0.2, -0.05, 0], [-0.4, -1, 0.2], [0.6, -0.9, -0.1],
-    ],
-    lines: [[0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6], [0, 1], [5, 6]],
-  },
-  {
-    scale: 0.9,
-    center: [-2, 4.5, -5],
-    stars: [
-      [1.2, 0.8, 0], [0.6, 0.4, 0.1], [0.2, 0.1, 0],
-      [0, -0.2, -0.1], [-0.4, 0, 0], [-0.7, -0.4, 0.1],
-    ],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]],
-  },
-];
-
-const Constellation = ({ interactive }) => {
-  const groupRef = useRef();
-  const linesRef = useRef();
-  const pointsRef = useRef();
-  const mouse = useRef(new THREE.Vector2(9999, 9999));
-  const ndc = useRef(new THREE.Vector3());
-  const rayDir = useRef(new THREE.Vector3());
-  const mousePoint = useRef(new THREE.Vector3());
-  const target = useRef(new THREE.Vector3());
-  const pull = useRef(new THREE.Vector3());
-
-  const { points, pairs } = useMemo(() => {
-    const nextPoints = [];
-    const nextPairs = [];
-    let offset = 0;
-
-    constellationData.forEach((item) => {
-      item.stars.forEach((star) => {
-        const anchor = new THREE.Vector3(
-          item.center[0] + star[0] * item.scale,
-          item.center[1] + star[1] * item.scale,
-          item.center[2] + star[2] * item.scale
-        );
-        nextPoints.push({ anchor, pos: anchor.clone() });
-      });
-      item.lines.forEach(([from, to]) => nextPairs.push([offset + from, offset + to]));
-      offset += item.stars.length;
-    });
-
-    return { points: nextPoints, pairs: nextPairs };
-  }, []);
-
-  const linePositions = useMemo(
-    () => new Float32Array((pairs.length + points.length) * 6),
-    [pairs.length, points.length]
-  );
-  const pointPositions = useMemo(() => new Float32Array(points.length * 3), [points.length]);
-
-  useEffect(() => {
-    if (!interactive) return undefined;
-
-    const onMove = (event) => {
-      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-    const onLeave = () => {
-      mouse.current.set(9999, 9999);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseout", onLeave);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseout", onLeave);
-    };
-  }, [interactive]);
-
-  useFrame((state, delta) => {
-    let lineIndex = 0;
-
-    pairs.forEach(([from, to]) => {
-      const start = points[from].pos;
-      const end = points[to].pos;
-      linePositions[lineIndex] = start.x;
-      linePositions[lineIndex + 1] = start.y;
-      linePositions[lineIndex + 2] = start.z;
-      linePositions[lineIndex + 3] = end.x;
-      linePositions[lineIndex + 4] = end.y;
-      linePositions[lineIndex + 5] = end.z;
-      lineIndex += 6;
-    });
-
-    const pointerActive = interactive && mouse.current.x !== 9999;
-    if (pointerActive) {
-      ndc.current.set(mouse.current.x, mouse.current.y, 0.5).unproject(state.camera);
-      rayDir.current.copy(ndc.current).sub(state.camera.position);
-      const length = rayDir.current.length() || 1;
-      rayDir.current.multiplyScalar(1 / length);
-      const dirZ = rayDir.current.z === 0 ? -0.0001 : rayDir.current.z;
-      const distance = (-5 - state.camera.position.z) / dirZ;
-      mousePoint.current.copy(state.camera.position).addScaledVector(rayDir.current, distance);
-      if (groupRef.current) groupRef.current.worldToLocal(mousePoint.current);
-    }
-
-    points.forEach((point, index) => {
-      target.current.copy(point.anchor);
-      if (pointerActive) {
-        const dist = point.anchor.distanceTo(mousePoint.current);
-        if (dist < 2.2 && dist > 0.01) {
-          pull.current
-            .copy(mousePoint.current)
-            .sub(point.anchor)
-            .multiplyScalar((1 - dist / 2.2) * 0.35);
-          target.current.add(pull.current);
-          linePositions[lineIndex] = point.pos.x;
-          linePositions[lineIndex + 1] = point.pos.y;
-          linePositions[lineIndex + 2] = point.pos.z;
-          linePositions[lineIndex + 3] = mousePoint.current.x;
-          linePositions[lineIndex + 4] = mousePoint.current.y;
-          linePositions[lineIndex + 5] = mousePoint.current.z;
-          lineIndex += 6;
-        }
-      }
-
-      point.pos.lerp(target.current, 0.08);
-      pointPositions[index * 3] = point.pos.x;
-      pointPositions[index * 3 + 1] = point.pos.y;
-      pointPositions[index * 3 + 2] = point.pos.z;
-    });
-
-    if (linesRef.current?.attributes?.position) {
-      linesRef.current.setDrawRange(0, lineIndex / 3);
-      linesRef.current.attributes.position.needsUpdate = true;
-    }
-    if (pointsRef.current?.attributes?.position) pointsRef.current.attributes.position.needsUpdate = true;
-    if (groupRef.current) groupRef.current.rotation.y += delta * 0.008;
-  });
-
-  return (
-    <group ref={groupRef}>
-      <points>
-        <bufferGeometry ref={pointsRef}>
-          <bufferAttribute attach="attributes-position" count={points.length} array={pointPositions} itemSize={3} />
-        </bufferGeometry>
-        <pointsMaterial color="#f4f7ff" size={0.018} transparent opacity={0.45} depthWrite={false} sizeAttenuation />
-      </points>
-      <lineSegments>
-        <bufferGeometry ref={linesRef}>
-          <bufferAttribute
-            attach="attributes-position"
-            count={(pairs.length + points.length) * 2}
-            array={linePositions}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#b7c9e4" transparent opacity={0.22} depthWrite={false} />
-      </lineSegments>
-    </group>
-  );
-};
-
-const StarField = ({ count }) => {
+const StarField = ({ count, size = 0.05, animate = true }) => {
   const ref = useRef();
   const positions = useMemo(() => {
     const coords = new Float32Array(count * 3);
     for (let i = 0; i < count; i += 1) {
       const i3 = i * 3;
-      const radius = 1.15 * Math.cbrt(Math.random());
+      const radius = 6 + Math.random() * 10;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       coords[i3] = radius * Math.sin(phi) * Math.cos(theta);
@@ -302,14 +124,14 @@ const StarField = ({ count }) => {
   }, [count]);
 
   useFrame((_, delta) => {
-    if (!ref.current) return;
+    if (!ref.current || !animate) return;
     ref.current.rotation.y -= delta / 28;
   });
 
   return (
     <group rotation={[0, 0, Math.PI / 5]}>
-      <Points ref={ref} positions={positions} stride={3} frustumCulled>
-        <PointMaterial transparent color="#e7eef8" size={0.0026} sizeAttenuation depthWrite={false} opacity={0.85} />
+      <Points ref={ref} positions={positions} stride={3} frustumCulled={false}>
+        <PointMaterial transparent color="#f4f7ff" size={size} sizeAttenuation depthWrite={false} opacity={0.95} />
       </Points>
     </group>
   );
@@ -318,7 +140,6 @@ const StarField = ({ count }) => {
 const StarsCanvas = () => {
   const reducedMotion = usePrefersReducedMotion();
   const mobile = useMediaQuery("(max-width: 768px)");
-  const finePointer = useMediaQuery("(pointer: fine)");
   const [hidden, setHidden] = useState(false);
   const [webgl] = useState(supportsWebGL);
 
@@ -328,40 +149,35 @@ const StarsCanvas = () => {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  if (reducedMotion || !webgl) {
-    return <div className="galaxy-fallback no-print" aria-hidden="true" />;
-  }
+  if (!webgl) return null;
 
   return (
-    <div className="no-print pointer-events-none fixed inset-0 z-[-1] bg-primary" aria-hidden="true">
+    <div className="no-print pointer-events-none fixed inset-0 z-0" aria-hidden="true">
       <CanvasBoundary>
         <Canvas
-          camera={{ position: [0, 0, 1], fov: mobile ? 82 : 68 }}
-          dpr={mobile ? [1, 1.15] : [1, 1.35]}
-          frameloop={hidden ? "never" : "always"}
+          key={mobile ? "mobile" : "desktop"}
+          camera={{ position: [0, 0, 1], fov: mobile ? 75 : 68 }}
+          dpr={mobile ? [1, 1.25] : [1, 1.5]}
+          frameloop={hidden || reducedMotion ? "demand" : "always"}
           gl={{
-            antialias: !mobile,
+            antialias: false,
             alpha: true,
             powerPreference: mobile ? "low-power" : "default",
           }}
-          performance={{ min: 0.5 }}
         >
           <Suspense fallback={null}>
-            <StarField count={mobile ? 1200 : 2200} />
-            <Galaxy position={[1.6, 0.8, -4.2]} rotation={[0.45, 0.15, -0.25]} color="#b7a6f0" count={mobile ? 1000 : 1800} />
-            {!mobile && (
-              <Galaxy position={[-4.2, 2.2, -8]} rotation={[Math.PI / 2, 0, 0.2]} color="#8fd0ea" scale={0.75} count={1200} />
-            )}
-            {!mobile && (
-              <Galaxy position={[5.2, -2.2, -10]} rotation={[0.35, 0.1, -0.15]} color="#7f92e8" scale={1.05} count={1000} />
-            )}
-            {!mobile && <Constellation interactive={finePointer} />}
-            {!mobile && (
-              <group>
-                <ShootingStar />
-                <ShootingStar />
-              </group>
-            )}
+            <StarField
+              count={mobile ? 1100 : 2000}
+              size={mobile ? 0.055 : 0.06}
+              animate={!reducedMotion}
+            />
+            <StarField
+              count={mobile ? 70 : 120}
+              size={mobile ? 0.11 : 0.13}
+              animate={!reducedMotion}
+            />
+            {!reducedMotion && <ShootingStar delay={700} />}
+            {!reducedMotion && <ShootingStar delay={mobile ? 4200 : 2200} />}
           </Suspense>
         </Canvas>
       </CanvasBoundary>

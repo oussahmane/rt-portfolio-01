@@ -7,7 +7,6 @@ import { LanguageProvider, useLanguage } from "./utils/i18n";
 import { scrollToSection } from "./utils/scroll";
 
 const StarsCanvas = lazy(() => import("./components/canvas/Stars"));
-
 const AdminLogin = lazy(() => import("./components/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./components/admin/AdminDashboard"));
 const ProtectedRoute = lazy(() => import("./components/admin/ProtectedRoute"));
@@ -31,7 +30,7 @@ const AppContent = () => {
   const { t } = useLanguage();
 
   return (
-    <div className={`relative z-0 min-h-screen ${isAdminRoute ? "bg-[#0f172a]" : "bg-primary"}`}>
+    <div className={`relative isolate min-h-screen ${isAdminRoute ? "bg-[#0f172a]" : "bg-primary"}`}>
       {!isAdminRoute && (
         <a
           className="skip-link"
@@ -45,7 +44,7 @@ const AppContent = () => {
         </a>
       )}
       {!isAdminRoute && <Navbar />}
-      <main>
+      <main className="relative z-10">
         <Suspense fallback={<AdminFallback />}>
           <Routes>
             <Route path="/" element={<Portfolio />} />
@@ -62,7 +61,7 @@ const AppContent = () => {
         </Suspense>
       </main>
       {!isAdminRoute && (
-        <Suspense fallback={<div className="galaxy-fallback no-print" aria-hidden="true" />}>
+        <Suspense fallback={null}>
           <StarsCanvas />
         </Suspense>
       )}

@@ -14,7 +14,6 @@ const Hero = () => {
 
   return (
     <section className="relative flex min-h-[100svh] items-center" aria-labelledby="hero-heading">
-      <div className="hero-scrim pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 lg:px-10">
         <p
           className={`text-[0.82rem] font-medium text-[#d5e2f4] ${
